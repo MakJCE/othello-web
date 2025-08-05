@@ -1,4 +1,8 @@
 import { OthelloGame } from './OthelloGame.js';
+
+const BLACK_PIECE_HTML = '<img src="assets/black_piece_reversi.png" class="game-piece" alt="Black Piece">';
+const WHITE_PIECE_HTML = '<img src="assets/white_piece_reversi.png" class="game-piece" alt="White Piece">';
+
 var game;
 window.addEventListener('load', (event) => {
   var boxes = document.querySelectorAll('i');
@@ -69,7 +73,7 @@ window.addEventListener('load', (event) => {
     for (var i of actual_posible_moves) {
       var to_id = i[0] * 8 + i[1];
       boxes[to_id].innerHTML = '';
-      boxes[to_id].style.color = '';
+      boxes[to_id].style.opacity = '';
       boxes[to_id].removeEventListener('click', selectBox);
     }
   }
@@ -104,20 +108,25 @@ window.addEventListener('load', (event) => {
       console.error(error);
     }
   }
-  function endGame(count_black, count_white) {
+  function endGame(human_turn, count_black, count_white) {
     var avg_pc_moves_times =
       pc_moves_times.reduce((a, b) => a + b, 0) / 1000 / pc_moves_times.length;
+    const winner_messages = {
+      human: '🎉You win!!!🎉',
+      pc: 'You lose! 😭',
+      tie: 'Tie! 👀'
+    }
     if (count_black > count_white) {
       alert(
-        `Game ended.\nThe winner is Black\nwith ${count_black} tokens against ${count_white}\nThe bot average response time is ${avg_pc_moves_times} segs`
+        `Game ended.\n${human_turn == 1? winner_messages.human: winner_messages.pc}\nThe winner is Black\nwith ${count_black} tokens against ${count_white}\nThe bot average response time is ${avg_pc_moves_times} segs`
       );
     } else if (count_white > count_black) {
       alert(
-        `Game ended.\nThe winner is White\nwith ${count_white} tokens against ${count_black}\nThe bot average response time is ${avg_pc_moves_times} segs`
+        `Game ended.\n${human_turn == 0? winner_messages.human: winner_messages.pc}\nThe winner is White\nwith ${count_white} tokens against ${count_black}\nThe bot average response time is ${avg_pc_moves_times} segs`
       );
     } else {
       alert(
-        `Game ended.\nThe game result is tie.\nBoth player has ${count_black} tokens.\nThe bot average response time is ${avg_pc_moves_times} segs`
+        `Game ended.\n${ winner_messages.tie}\nThe game result is tie.\nBoth player has ${count_black} tokens.\nThe bot average response time is ${avg_pc_moves_times} segs`
       );
     }
     pc_moves_times = [];
@@ -182,22 +191,21 @@ window.addEventListener('load', (event) => {
 
           for (var i of player_1) {
             to_id = i[0] * 8 + i[1];
-            boxes[to_id].innerHTML = '●';
+            boxes[to_id].innerHTML = BLACK_PIECE_HTML;
           }
           for (var i of player_2) {
             to_id = i[0] * 8 + i[1];
-            boxes[to_id].innerHTML = '○';
+            boxes[to_id].innerHTML = WHITE_PIECE_HTML;
           }
           if (message.moves.length == 0) {
-            endGame(player_1.length, player_2.length);
+            endGame(message.turn, player_1.length, player_2.length);
           }
           actual_posible_moves = message.moves;
           for (var i of actual_posible_moves) {
             to_id = i[0] * 8 + i[1];
             boxes[to_id].addEventListener('click', selectBox);
-            boxes[to_id].innerHTML =
-              message.turn === game.white_player ? '○' : '●';
-            boxes[to_id].style.color = '#0be8908d';
+            boxes[to_id].innerHTML = message.turn === game.white_player ? WHITE_PIECE_HTML : BLACK_PIECE_HTML;
+            boxes[to_id].style.opacity = '0.2';
           }
           var human_turn = message.turn;
           pc_moves_times.length &&
